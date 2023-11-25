@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Collectible } from './schema/collectible.interface';
+import FormData from 'form-data';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 
 @Injectable()
 export class CollectibleService {
   constructor(
+    private configService: ConfigService,
     @InjectModel('Collectible') private collectibleModel: Model<Collectible>,
   ) {}
   async getCollectibles(): Promise<any> {
@@ -31,6 +35,30 @@ export class CollectibleService {
       return { status: true, collectible };
     } catch (error) {
       return { status: false, error };
+    }
+  }
+
+  async pinToPinata(metadata: Buffer): Promise<string> {
+    console.log('Is metadata a Buffer:', Buffer.isBuffer(metadata));
+
+    const url = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+    const data = new FormData();
+    data.append('file', metadata, { filename: 'metadata.json' });
+
+    const config = {
+      headers: {
+        ...data.getHeaders(),
+        pinata_api_key: this.configService.get('PINATA_API_KEY'),
+        pinata_secret_api_key: this.configService.get('PINATA_API_SECRET'),
+      },
+    };
+
+    try {
+      const response = await axios.post(url, data, config);
+      return `https://ipfs.io/ipfs/${response.data.IpfsHash}`;
+    } catch (error) {
+      console.error('Error pinning to Pinata:', error);
+      throw error;
     }
   }
 

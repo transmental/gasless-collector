@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
 import collectorAbi from 'src/abi/collectorAbi.json';
-import axios from 'axios';
-import FormData from 'form-data';
 import { CollectibleService } from 'src/collectibles/collectible.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Whitelist } from '../whitelist/schema/whitelist.interface';
 
 type ResolveFunction = (value: any) => void;
 type RejectFunction = (reason?: any) => void;
@@ -27,42 +28,35 @@ export class BlockchainService {
   constructor(
     private collectibleService: CollectibleService,
     private configService: ConfigService,
+    @InjectModel('Whitelist')
+    private readonly whitelistModel: Model<Whitelist>,
   ) {
-    this.provider = new ethers.JsonRpcProvider(
-      this.configService.get('GOERLI_RPC_ENDPOINT'),
-    );
-    this.wallet = new ethers.Wallet(
-      this.configService.get('RELAYER_PRIVATE_KEY'),
-      this.provider,
-    );
-    this.contract = new ethers.Contract(
-      this.configService.get('GOERLI_CONTRACT_ADDRESS'),
-      collectorAbi,
-      this.wallet,
-    );
-  }
-
-  private async pinToPinata(metadata: Buffer): Promise<string> {
-    console.log('Is metadata a Buffer:', Buffer.isBuffer(metadata));
-
-    const url = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
-    const data = new FormData();
-    data.append('file', metadata, { filename: 'metadata.json' });
-
-    const config = {
-      headers: {
-        ...data.getHeaders(),
-        pinata_api_key: this.configService.get('PINATA_API_KEY'),
-        pinata_secret_api_key: this.configService.get('PINATA_API_SECRET'),
-      },
-    };
-
-    try {
-      const response = await axios.post(url, data, config);
-      return `https://ipfs.io/ipfs/${response.data.IpfsHash}`;
-    } catch (error) {
-      console.error('Error pinning to Pinata:', error);
-      throw error;
+    if (this.configService.getOrThrow('ENV') === 'local') {
+      this.provider = new ethers.JsonRpcProvider(
+        this.configService.get('GOERLI_RPC_ENDPOINT'),
+      );
+      this.wallet = new ethers.Wallet(
+        this.configService.get('GOERLI_RELAYER_PRIVATE_KEY'),
+        this.provider,
+      );
+      this.contract = new ethers.Contract(
+        this.configService.get('GOERLI_CONTRACT_ADDRESS'),
+        collectorAbi,
+        this.wallet,
+      );
+    } else {
+      this.provider = new ethers.JsonRpcProvider(
+        this.configService.get('ARB_RPC_ENDPOINT'),
+      );
+      this.wallet = new ethers.Wallet(
+        this.configService.get('ARB_RELAYER_PRIVATE_KEY'),
+        this.provider,
+      );
+      this.contract = new ethers.Contract(
+        this.configService.get('ARB_CONTRACT_ADDRESS'),
+        collectorAbi,
+        this.wallet,
+      );
     }
   }
 
@@ -82,6 +76,7 @@ export class BlockchainService {
     } catch (error) {
       console.log('ERROR IN QUEUE', this.queue);
       reject(error);
+      throw error;
     } finally {
       console.log('FINISHED QUEUE', this.queue);
       this.processing = false;
@@ -89,11 +84,13 @@ export class BlockchainService {
     }
   }
 
-  async mintNFTInternal(
+  private async mintNFTInternal(
     toAddress: string,
     collectibleId: string,
   ): Promise<any> {
     try {
+      const whitelist = await this.whitelistCheck(toAddress);
+      if (whitelist.status !== true) throw new Error(whitelist.error);
       const res = await this.collectibleService.canUserMint(
         toAddress,
         collectibleId,
@@ -107,10 +104,12 @@ export class BlockchainService {
         JSON.stringify(res.collectible.metadata),
       );
 
-      const tokenURI = await this.pinToPinata(metadataBuffer);
+      const tokenURI =
+        await this.collectibleService.pinToPinata(metadataBuffer);
       console.log(`toAddress: ${toAddress}, tokenURI: ${tokenURI}`);
       const tx = await this.contract.mint(toAddress, tokenURI);
       const receipt = await tx.wait();
+      console.log(receipt);
       const tokenID = BigInt(receipt.logs[1].data);
       const collectible = await this.collectibleService.updateCollectible(
         collectibleId,
@@ -125,6 +124,7 @@ export class BlockchainService {
         to: toAddress,
         tokenID: tokenID.toString(),
         collectible,
+        receipt,
       };
     } catch (error) {
       console.log(error);
@@ -137,5 +137,30 @@ export class BlockchainService {
       this.queue.push({ toAddress, collectibleId, resolve, reject });
       this.processQueue();
     });
+  }
+
+  checkArray(toAddress: string, addresses: string[]): boolean {
+    for (const address of addresses) {
+      if (address === toAddress) {
+        console.log('IN WHITELIST');
+        return true;
+      }
+    }
+    console.log('NOT IN WHITELIST');
+    return false;
+  }
+
+  private async whitelistCheck(toAddress: string): Promise<any> {
+    try {
+      const res = await this.whitelistModel.findOne({});
+      if (!res.active) return { status: true };
+      if (res.active && !this.checkArray(toAddress, res.addresses)) {
+        throw new Error('User not whitelisted');
+      } else {
+        return { status: true };
+      }
+    } catch (error) {
+      return { status: false, error };
+    }
   }
 }
