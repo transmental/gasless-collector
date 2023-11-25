@@ -110,7 +110,7 @@ export default function Home() {
                 objectFit="cover"
               />
             </Box>
-            <Flex direction="row" position="fixed" bottom="32px" alignItems="center" justifyContent="space-between" mt="16px" h="16px" w='300px'>
+            <Flex direction="row" position="fixed" bottom="32px" alignItems="center" justifyContent={collectibles.length > 1 ? "space-between" : "center"} mt="16px" h="16px" w='300px'>
               {collectibles.length > 1 && <Button variant={"ghost"} onClick={prevSlide}><ChevronLeftIcon /></Button>}
               <Text>{collectibles[currentSlide].minted}/{collectibles[currentSlide].supply} Collected</Text>
               {collectibles.length > 1 && <Button variant={"ghost"} onClick={nextSlide}><ChevronRightIcon /></Button>}
