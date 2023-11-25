@@ -4,19 +4,19 @@ import Providers from "./providers/Providers";
 import Header from "./components/Header";
 
 export const metadata: Metadata = {
-  title: "Foundnone Collectibles",
-  description: "Collect Foundnone NFT's for free on Arbitrum.",
+  title: "Tokyo Kageru",
+  description: "Collect Tokyo Kageru NFT's for free on Arbitrum.",
   twitter: {
     card: "summary_large_image",
     title: "Foundnone Collectibles",
-    images: "",
+    images: "https://ipfs.io/ipfs/QmT6mLau18kqib6WPeZ9RYa4EZrVtjYdGFNcdjppTqZtmB",
   },
   openGraph: {
-    images: [""],
-    title: "Foundnone Collectibles",
-    description: "Collect Foundnone NFT's for free on Arbitrum.",
+    images: ["https://ipfs.io/ipfs/QmT6mLau18kqib6WPeZ9RYa4EZrVtjYdGFNcdjppTqZtmB"],
+    title: "Tokyo Kageru",
+    description: "Collect Tokyo Kageru NFT's for free on Arbitrum.",
     type: "website",
-    url: "",
+    url: "https://collect.foundnone.xyz",
   },
 };
 

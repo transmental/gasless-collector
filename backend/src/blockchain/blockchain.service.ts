@@ -31,7 +31,10 @@ export class BlockchainService {
     @InjectModel('Whitelist')
     private readonly whitelistModel: Model<Whitelist>,
   ) {
-    if (this.configService.getOrThrow('ENV') === 'local' || 'dev') {
+    if (
+      this.configService.getOrThrow('ENV') === 'local' ||
+      this.configService.getOrThrow('ENV') === 'dev'
+    ) {
       this.provider = new ethers.JsonRpcProvider(
         this.configService.get('GOERLI_RPC_ENDPOINT'),
       );
