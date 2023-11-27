@@ -80,17 +80,20 @@ export default function Home() {
   }, []);
 
   return (
-    <Flex alignItems="center" justifyContent="center" paddingY="72px" paddingX="32px" gap="8px">
+    <Flex alignItems="center" justifyContent="center" paddingY="72px" paddingX="32px" gap="8px" minH={"100vh"}>
       {collectibles ? (
         <Flex direction="column" gap="32px" alignItems="center">
           <Flex alignItems='center' justifyContent='space-between' direction="column" key={collectibles[currentSlide]._id} gap="8px">
             <Flex direction="row" alignItems="center" justifyContent="space-between" w="full">
-              <Text>{collectibles[currentSlide].metadata.name}</Text>
-              {collectibles[currentSlide].minted !== collectibles[currentSlide].supply && (
+              <Text fontWeight={'bold'}>{collectibles[currentSlide].metadata.name}</Text>
+              {(account.address && collectibles[currentSlide].minted !== collectibles[currentSlide].supply && !collectibles[currentSlide].collectedBy.includes((account.address).toString())) && (
                 <Button onClick={async () => handleCollect(collectibles[currentSlide]._id)}>Collect</Button>
               )}
+              {account.address && collectibles[currentSlide].collectedBy.includes((account.address).toString()) && (
+                <Text fontWeight={'bold'}>Collected</Text>
+              )}
             </Flex>
-            <Box position="relative" h='75vh' maxW='80vw'>
+            <Box position="relative" h='75vh' maxW='90vw'>
               <IconButton
                 aria-label="Info"
                 icon={<FaInfo />}
@@ -99,7 +102,7 @@ export default function Home() {
                 backgroundColor={'none'}
                 top={2}
                 right={2}
-                zIndex={2}
+                zIndex={1}
                 onClick={() => openModal(collectibles[currentSlide])}
               />
               <Image
@@ -110,10 +113,10 @@ export default function Home() {
                 objectFit="cover"
               />
             </Box>
-            <Flex direction="row" position="fixed" bottom="32px" alignItems="center" justifyContent={collectibles.length > 1 ? "space-between" : "center"} mt="16px" h="16px" w='300px'>
-              {collectibles.length > 1 && <Button variant={"ghost"} onClick={prevSlide}><ChevronLeftIcon /></Button>}
+            <Flex backdropFilter={"blur(8px)"} borderRadius={"32px"} direction="row" position="fixed" bottom="32px" alignItems="center" justifyContent={collectibles.length > 1 ? "space-between" : "center"} mt="16px" h="56px" w='300px' px={'8px'}>
+              {collectibles.length > 1 && <Button variant={"ghost"} borderRadius={"full"} onClick={prevSlide}><ChevronLeftIcon /></Button>}
               <Text>{collectibles[currentSlide].minted}/{collectibles[currentSlide].supply} Collected</Text>
-              {collectibles.length > 1 && <Button variant={"ghost"} onClick={nextSlide}><ChevronRightIcon /></Button>}
+              {collectibles.length > 1 && <Button variant={"ghost"} borderRadius={"full"} onClick={nextSlide}><ChevronRightIcon /></Button>}
             </Flex>
           </Flex>
           <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isCentered>
@@ -133,7 +136,7 @@ export default function Home() {
                     ))}
                     <Flex direction="row" justifyContent="space-between" my='16px'>
                       <Link target='blank' href={`https://arbiscan.io/address/${process.env.NEXT_PUBLIC_COLLECTIBLE_CONTRACT_ADDRESS || null}`}>Contract</Link>
-                      <Link target='blank' href={selectedCollectible.metadata.image_url || selectedCollectible.metadata.animation_url}>Media</Link>
+                      <Link target='blank' href={convertImage(selectedCollectible.metadata.image)}>Media</Link>
                       <Link target='blank' href={`${process.env.NEXT_PUBLIC_OPENSEA_LINK || null}`} >Opensea</Link>
                     </Flex>
                   </Flex>
