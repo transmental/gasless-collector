@@ -13,7 +13,7 @@ export class CollectibleService {
     @InjectModel('Collectible') private collectibleModel: Model<Collectible>,
   ) {}
   async getCollectibles(): Promise<any> {
-    const res = this.collectibleModel.find({});
+    const res = this.collectibleModel.find({}).sort({ _id: -1 });
     return res;
   }
 
