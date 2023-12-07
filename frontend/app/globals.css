@@ -8,3 +8,11 @@ html {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
+
+.grow-on-hover {
+  transition: transform 1.2s; /* Smooth transition for the transformation */
+}
+
+.grow-on-hover:hover {
+  transform: scale(1.1); /* Scale up the icon to 110% of its original size on hover */
+}

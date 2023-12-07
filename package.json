@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "backend": "cd backend && nest start --watch",
+        "frontend": "cd frontend && npm run dev"
+    },
+    "dependencies": {
+        "react-swipeable": "^7.0.1"
+    }
+}
