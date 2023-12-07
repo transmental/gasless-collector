@@ -19,6 +19,11 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCollectible, setSelectedCollectible] = useState<Collectible | null>(null);
   const [isLargerThan1100] = useMediaQuery("(min-width: 1100px)");
+  const { setColorMode } = useColorMode()
+
+  useEffect(() => {
+      setColorMode('dark')
+  }, [])
 
   const openModal = (collectible: Collectible) => {
     setSelectedCollectible(collectible);
