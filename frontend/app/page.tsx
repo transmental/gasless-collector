@@ -9,6 +9,7 @@ import { FaInfo } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 import { convertImage } from './utils/convertImage';
 import Layout from '@components/Layout';
+import { motion } from "framer-motion"
 
 export default function Home() {
   const account = useAccount()
@@ -22,7 +23,7 @@ export default function Home() {
   const { setColorMode } = useColorMode()
 
   useEffect(() => {
-      setColorMode('dark')
+    setColorMode('dark')
   }, [])
 
   const openModal = (collectible: Collectible) => {
@@ -139,13 +140,20 @@ export default function Home() {
             <Flex alignItems='center' justifyContent='space-between' direction="column" key={collectibles[currentSlide]._id} gap="8px">
               {collectibles.length > 1 && <Button className="grow-on-hover" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} left={isLargerThan1100 ? "32px" : "8px"} onClick={prevSlide}><ChevronLeftIcon stroke={"none"} boxSize={"32px"} /></Button>}
               {collectibles.length > 1 && <Button className="grow-on-hover" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} right={isLargerThan1100 ? "32px" : "8px"} onClick={nextSlide}><ChevronRightIcon stroke={"none"} boxSize={"32px"} /></Button>}
-              <Image
-                src={convertImage(collectibles[currentSlide].metadata.image_url || collectibles[currentSlide].metadata.image)}
-                alt={collectibles[currentSlide].metadata.name}
-                h={isLargerThan1100 ? "80vh" : "70vh"}
-                maxW="80vw"
-                objectFit="cover"
-              />
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, x: 200 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Image
+                  src={convertImage(collectibles[currentSlide].metadata.image_url || collectibles[currentSlide].metadata.image)}
+                  alt={collectibles[currentSlide].metadata.name}
+                  h={isLargerThan1100 ? "80vh" : "70vh"}
+                  maxW="80vw"
+                  objectFit="cover"
+                />
+              </motion.div>
               <Flex
                 as="footer"
                 width="full"
