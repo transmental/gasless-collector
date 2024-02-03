@@ -105,7 +105,18 @@ export default function Home() {
 
   const fetchCollectibles = async () => {
     const data = await getCollectibles();
+    preloadImages(data)
     setCollectibles(data);
+  };
+
+  const preloadImages = (data: Collectible[] | null) => {
+    if (!data) return
+    data.forEach((collectible) => {
+      console.log('preloading')
+      const imageUrl = convertImage(collectible.metadata.image_url || collectible.metadata.image);
+      const img = new window.Image(); // Use window.Image to explicitly refer to the native Image object
+      img.src = imageUrl;
+    });
   };
 
   useEffect(() => {
@@ -138,8 +149,8 @@ export default function Home() {
         {collectibles ? (
           <Flex direction="column" gap="32px" alignItems="center" justifyItems={'center'}>
             <Flex alignItems='center' justifyContent='space-between' direction="column" key={collectibles[currentSlide]._id} gap="8px">
-              {collectibles.length > 1 && <Button className="grow-on-hover" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} left={isLargerThan1100 ? "32px" : "8px"} onClick={prevSlide}><ChevronLeftIcon stroke={"none"} boxSize={"32px"} /></Button>}
-              {collectibles.length > 1 && <Button className="grow-on-hover" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} right={isLargerThan1100 ? "32px" : "8px"} onClick={nextSlide}><ChevronRightIcon stroke={"none"} boxSize={"32px"} /></Button>}
+              {collectibles.length > 1 && <Button className="grow-on-hover z-10" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} left={isLargerThan1100 ? "32px" : "8px"} onClick={prevSlide}><ChevronLeftIcon stroke={"none"} boxSize={"32px"} /></Button>}
+              {collectibles.length > 1 && <Button className="grow-on-hover z-10" variant={"ghost"} borderRadius={"8px"} position={"absolute"} top={"50%"} right={isLargerThan1100 ? "32px" : "8px"} onClick={nextSlide}><ChevronRightIcon stroke={"none"} boxSize={"32px"} /></Button>}
               <motion.div
                 key={currentSlide}
                 initial={{ opacity: 0, x: 200 }}
