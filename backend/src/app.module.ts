@@ -18,6 +18,7 @@ import { CommandModule } from 'nestjs-command';
 import { WhitelistService } from './whitelist/whitelist.service';
 import { HttpModule } from '@nestjs/axios';
 import { WhitelistModule } from './whitelist/whitelist.module';
+import { MonitorModule } from './monitor/monitor.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { WhitelistModule } from './whitelist/whitelist.module';
       { name: 'Collectible', schema: CollectibleSchema },
       { name: 'Whitelist', schema: WhitelistSchema },
     ]),
+    MonitorModule,
   ],
   controllers: [
     AppController,
