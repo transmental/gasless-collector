@@ -40,6 +40,7 @@ export class MonitorService {
 
   @Interval(30000)
   async monitorTransfers() {
+    if (this.configService.getOrThrow('ENV') !== 'prod') return;
     const query = `{
       transfers(where: {blockNumber_gte: ${this.block}}){
         transactionHash
