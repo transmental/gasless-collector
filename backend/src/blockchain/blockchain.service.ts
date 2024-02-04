@@ -168,34 +168,21 @@ export class BlockchainService {
   }
 
   async getBlockNumber(): Promise<number> {
-    const prov = new ethers.JsonRpcProvider(
-      this.configService.get('ARB_RPC_ENDPOINT'),
-    );
-    return await prov.getBlockNumber();
+    return await this.provider.getBlockNumber();
   }
 
   async getTxValue(txHash: string): Promise<string> {
-    const prov = new ethers.JsonRpcProvider(
-      this.configService.get('ARB_RPC_ENDPOINT'),
-    );
-
-    const tx = await prov.getTransaction(txHash);
+    const tx = await this.provider.getTransaction(txHash);
     return ethers.formatEther(tx.value.toString());
   }
   async getTokenUri(tokenId: string): Promise<string> {
-    const prov = new ethers.JsonRpcProvider(
-      this.configService.get('ARB_RPC_ENDPOINT'),
-    );
     const contract = new ethers.Contract(
       this.configService.get('ARB_CONTRACT_ADDRESS'),
       collectorAbi,
-      prov,
+      this.provider,
     );
 
-    console.log(tokenId);
-
     const tokenUri = await contract.tokenURI(tokenId);
-    console.log(tokenUri);
     return tokenUri;
   }
 }
