@@ -166,4 +166,23 @@ export class BlockchainService {
       return { status: false, error };
     }
   }
+
+  async getBlockNumber(): Promise<number> {
+    return await this.provider.getBlockNumber();
+  }
+
+  async getTxValue(txHash: string): Promise<string> {
+    const tx = await this.provider.getTransaction(txHash);
+    return ethers.formatEther(tx.value.toString());
+  }
+  async getTokenUri(tokenId: string): Promise<string> {
+    const contract = new ethers.Contract(
+      this.configService.get('ARB_CONTRACT_ADDRESS'),
+      collectorAbi,
+      this.provider,
+    );
+
+    const tokenUri = await contract.tokenURI(tokenId);
+    return tokenUri;
+  }
 }

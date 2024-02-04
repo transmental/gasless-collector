@@ -24,5 +24,6 @@ import { WhitelistSchema } from '../whitelist/schema/whitelist.schema';
     ConfigService,
     CollectibleService,
   ],
+  exports: [BlockchainService],
 })
 export class BlockchainModule {}
