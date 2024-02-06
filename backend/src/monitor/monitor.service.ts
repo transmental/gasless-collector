@@ -79,7 +79,7 @@ export class MonitorService {
     this.timeStamp = Math.floor(Date.now() / 1000);
   }
 
-  @Interval(3000)
+  @Interval(10000)
   async monitorActivity() {
     if (this.configService.getOrThrow('ENV') !== 'prod') return;
     const query = `{
