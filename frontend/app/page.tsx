@@ -204,7 +204,7 @@ export default function Home() {
                                                 Collected
                                             </Button>;
                                         default:
-                                            return <Box w="80px" h="56px" visibility="hidden"></Box>;
+                                            return <></>;
                                     }
                                 })()}
                             </Box>
