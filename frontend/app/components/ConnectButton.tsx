@@ -21,7 +21,7 @@ export default function ConnectButton() {
         const res = await auth(address, messageToSign, data)
         toast({
           title: 'Successfully authenticated.',
-          description: 'Time to collect!',
+          description: 'You are authorized to collect.',
           status: 'success',
           duration: 5000,
           isClosable: true,
